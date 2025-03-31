@@ -1,0 +1,155 @@
+nco is not found in PATH. Loading module...
+cdo genycon,r3600x1801 -selname,cell_area -setgrid,/work/ab0246/a270092/input/fesom2/CORE2/core2_griddes_nodes.nc /work/ab0246/a270092/input/fesom2/CORE2/core2_griddes_nodes.nc weights_cell_area_r3600x1801.nc
+cdo(1) selname: Process started
+cdo(2) setgrid: Process started
+cdo    gencon: YAC first order conservative weights from unstructured (126858) to lonlat (3600x1801) grid
+cdo(2) setgrid: Processed 2256368 values from 7 variables over 1 timestep.
+cdo(1) selname: Processed 126858 values from 7 variables over 1 timestep.
+cdo    gencon: Processed 126858 values from 1 variable over 1 timestep [526.98s 1294MB].
+cdo -L -remap,r3600x1801,weights_cell_area_r3600x1801.nc -selname,cell_area -setgrid,/work/ab0246/a270092/input/fesom2/CORE2/core2_griddes_nodes.nc /work/ab0246/a270092/input/fesom2/CORE2/core2_griddes_nodes.nc CORE2_regular.nc
+cdo(1) selname: Process started
+cdo(2) setgrid: Process started
+cdo(2) setgrid: Processed 2256368 values from 7 variables over 1 timestep.
+cdo(1) selname: Processed 126858 values from 7 variables over 1 timestep.
+cdo    remap: Processed 126858 values from 1 variable over 1 timestep [1.27s 1005MB].
+ncap2 -O -s 'where(cell_area>0.) cell_area=0;' CORE2_regular.nc CORE2_oce.nc
+cdo setmisstoc,1 CORE2_oce.nc CORE2_land.nc
+cdo    setmisstoc: Processed 6483600 values from 1 variable over 1 timestep [0.19s 164MB].
+cdo griddes skt.grb > griddes.txt
+cdo    griddes: Processed 1 variable [2.28s 34MB].
+cdo -setgrid,skt.grb -remapdis,griddes.txt CORE2_land.nc CORE2_oifs.nc
+cdo(1) remapdis: Process started
+cdo(1) remapdis: Distance-weighted average weights from lonlat (3600x1801) to gaussian_reduced (40320) grid
+cdo(1) remapdis: Processed 6483600 values from 1 variable over 1 timestep.
+cdo    setgrid: Processed 40320 values from 1 variable over 1 timestep [0.37s 246MB].
+/work/ab0246/a270092/software/ocp-tool/ocp-tool.py:786: FutureWarning: The return type of `Dataset.dims` will be changed to return a set of dimension names in future, in order to be more consistent with `DataArray.dims`. To access a mapping from dimension names to lengths, please use `Dataset.sizes`.
+  for dim_name, dim_size in interpolated_ds.dims.items():
+<frozen _collections_abc>:894: FutureWarning: The return type of `Dataset.dims` will be changed to return a set of dimension names in future, in order to be more consistent with `DataArray.dims`. To access a mapping from dimension names to lengths, please use `Dataset.sizes`.
+osgeo is not installed, conversion to Geo formats like Geotiff (fesom2GeoFormat) will not work.
+ 
+ ==================================================  
+
+ Reading OpenIFS gridfile for T95 
+ 
+ ==================================================  
+
+ Read grid from file: /work/ab0246/a270092/software/ocp-tool/input/gaussian_grids_octahedral_reduced//o96_reduced.txt 
+ Size of grid: nx = 40320, ny = 1
+ 
+ ==================================================  
+
+ Using cdo and nco to interpolate from ocean to OpenIFS land sea mask
+ Does FESOM grid path exist? True
+ Is the overwrite active? False
+ Using existing grid description file '/work/ab0246/a270092/input/fesom2/CORE2/core2_griddes_nodes.nc'
+ 
+ ==================================================  
+
+ Using the following command to generate OpenIFS lsm based on FESOM mesh description file:
+./prep_fesom.sh /work/ab0246/a270092/input/fesom2/CORE2/core2_griddes_nodes.nc CORE2 r3600x1801 ../openifs_input_default/ICMGGabenINIT False
+ Reading ocean based land sea mask: CORE2
+ 
+ ==================================================  
+
+ Opening Grib input file: /work/ab0246/a270092/software/ocp-tool/input/openifs_input_default/ 
+number of lsm timesteps: 40320
+number of lsm timesteps: 40320
+ 
+ ==================================================  
+
+Shape of Gribfield:(81, 40320)
+Number of land points: 11253
+lsm_datadates: [(94259867661456, 20110131), (94259969929824, 19900101)]
+Overwriting lsm for date: 20110131
+Overwriting lsm for date: 19900101
+Writing file: /work/ab0246/a270092/software/ocp-tool/output/oasis_mct3_input/grids.nc 
+ Write lons, lats, corner points for grid: A096  (T95)
+ Write lons, lats, corner points for grid: L096  (T95)
+ Write lons, lats, corner points for grid: R096  (T95)
+ Write lons, lats, corner points for grid: TCO95-land  (T95)
+ Adding /work/ab0246/a270092/software/ocp-tool/input/runoff_map_default/runoff_grids.nc to oasis files
+ Wrote /work/ab0246/a270092/software/ocp-tool/output/oasis_mct3_input/grids.nc 
+ 
+ ==================================================  
+
+Writing file: /work/ab0246/a270092/software/ocp-tool/output/oasis_mct3_input/areas.nc 
+ Write lons, lats, corner points for grid: A096  (T95)
+ Write lons, lats, corner points for grid: L096  (T95)
+ Write lons, lats, corner points for grid: R096  (T95)
+ Write lons, lats, corner points for grid: TCO95-land  (T95)
+ Adding /work/ab0246/a270092/software/ocp-tool/input/runoff_map_default/runoff_areas.nc to oasis files
+ Wrote /work/ab0246/a270092/software/ocp-tool/output/oasis_mct3_input/areas.nc 
+ 
+ ==================================================  
+
+Writing file: /work/ab0246/a270092/software/ocp-tool/output/oasis_mct3_input/masks.nc 
+ Write lons, lats, corner points for grid: A096  (T95)
+ Write lons, lats, corner points for grid: L096  (T95)
+ Write lons, lats, corner points for grid: R096  (T95)
+ Write lons, lats, corner points for grid: TCO95-land  (T95)
+ Adding /work/ab0246/a270092/software/ocp-tool/input/runoff_map_default/runoff_masks.nc to oasis files
+ Wrote /work/ab0246/a270092/software/ocp-tool/output/oasis_mct3_input/masks.nc 
+ 
+ ==================================================  
+
+Read input files
+Extract source grid and data
+Prepare target grid
+Create a KDTree for nearest-neighbor interpolation
+Creating interpolated dataset
+Adjusting dimensions...
+Updating dimension: x from 88838 to 40320
+Interpolating variables...
+Updated variable: FracLVeg
+Updated variable: TypeHVeg
+Updated variable: LAIHVeg
+Updated variable: LAILVeg
+Updated variable: FracHVeg
+Updated variable: TypeLVeg
+Updated variable: SLRVeg
+Updated variable: SHUMVeg
+Updated variable: SoilMVeg.L001
+Updated variable: SoilMVeg.L002
+Updated variable: SoilMVeg.L003
+Updated variable: SoilMVeg.L004
+Updated variable: SDVeg
+Updated variable: SDensVeg
+Updated variable: PRESVeg
+Updated variable: SoilTVeg.L001
+Updated variable: SoilTVeg.L002
+Updated variable: SoilTVeg.L003
+Updated variable: SoilTVeg.L004
+Updated variable: SSRVeg
+Updated variable: T2MVeg
+Updated variable: TMAXVeg
+Updated variable: TMINVeg
+Updated variable: TPVeg
+Updated variable: WSPDVeg
+Updated variable: GUE_FRAH
+Updated variable: GUE_FRAL
+Updated variable: GUE_HLAI
+Updated variable: GUE_LLAI
+Updated variable: GUE_TYPH
+Updated variable: GUE_TYPL
+Updated variable: LWNR_LPJ
+Updated variable: SHUM_LPJ
+Updated variable: SM1L_LPJ
+Updated variable: SM2L_LPJ
+Updated variable: SM3L_LPJ
+Updated variable: SM4L_LPJ
+Updated variable: SNOC_LPJ
+Updated variable: SNOD_LPJ
+Updated variable: SPRE_LPJ
+Updated variable: ST1L_LPJ
+Updated variable: ST2L_LPJ
+Updated variable: ST3L_LPJ
+Updated variable: ST4L_LPJ
+Updated variable: SWNR_LPJ
+Updated variable: T2M_LPJG
+Updated variable: TMAX_LPJ
+Updated variable: TMIN_LPJ
+Updated variable: TPRE_LPJ
+Updated variable: WSPD_LPJ
+Saving interpolated dataset
+Interpolated data successfully saved to /work/ab0246/a270092/software/ocp-tool/output/lpj-guess//vegin_TCO95.nc
+dict_keys(['lon', 'lat', 'drainage_basin_id', 'arrival_point_id', 'calving_point_id'])

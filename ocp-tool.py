@@ -1081,12 +1081,12 @@ def modify_lsm(gribfield, fesom_grid_sorted, lsm_id, slt_id, cl_id, lons_list,
     
     # Soil class of removed lakes is set to SANDY CLAY LOAM
     for i in np.arange (0, len(gribfield_mod[slt_id])-1):
-        if gribfield_mod[lsm_id][i] <= 0.5 and fesom_grid_sorted[i] >= .99:
+        if gribfield_mod[lsm_id][i] <= 0.5 and fesom_grid_sorted[i] >= .5:
             gribfield_mod[slt_id][i] = 6
             gribfield_mod[lsm_id][i] = 1
 
     for i in np.arange (0, len(gribfield_mod[slt_id])-1):
-        if gribfield_mod[lsm_id][i] >= 0.5 and fesom_grid_sorted[i] < .99:
+        if gribfield_mod[lsm_id][i] >= 0.5 and fesom_grid_sorted[i] < .5:
             gribfield_mod[slt_id][i] = 0
             gribfield_mod[lsm_id][i] = 0
             
@@ -1121,14 +1121,14 @@ if __name__ == '__main__':
     
     # Truncation number of desired OpenIFS grid. Multiple possible.
     # Choose the ones you need [63, 95, 159, 255, 319, 399, 511, 799, 1279]
-    resolution_list = [255]
+    resolution_list = [95]
 
     # Choose type of trucation. linear or cubic-octahedral
-    truncation_type = 'linear'
+    truncation_type = 'cubic-octahedral'
 
     # OpenIFS experiment name. This 4 digit code is part of the name of the
     # ICMGG????INIT file you got from EMCWF
-    exp_name_oifs = 'abl7' #default for cubic-octahedral
+    exp_name_oifs = 'ab46' #default for cubic-octahedral
     # I have not yet found a way to determine automatically the number of
     # fields in the ICMGG????INIT file. Set it correctly or stuff will break!
     num_fields = 81
@@ -1156,7 +1156,10 @@ if __name__ == '__main__':
     output_path_oasis = root_dir+'output/oasis_mct3_input/'
     output_path_lpjg = root_dir+'output/lpj-guess/'
     
-    
+    if grid_name_oce == 'CORE2':
+        manual_basin_removal=['caspian-sea', 'black-sea']
+    else:
+        manual_basin_removal=['caspian-sea']
     
     # Find working directory
     dir_path = root_dir
@@ -1172,7 +1175,7 @@ if __name__ == '__main__':
 
     # Loop over atmosphere resolutions. Todo: select correct exp_name_oifs
     for res_num in resolution_list:
-
+        
         center_lats, center_lons, \
         crn_lats, crn_lons, \
         gridcell_area, lons_list, \
@@ -1196,12 +1199,12 @@ if __name__ == '__main__':
                           lsm_binary_a, lsm_binary_l, lsm_binary_r, NN, input_path_runoff,verbose=verbose)
         
         plotting_lsm(res_num, lsm_binary_l, lsm_binary_a, center_lats, center_lons,verbose=verbose)
-
-        '''lons, lats = modify_runoff_map(res_num, input_path_runoff, output_path_runoff,
+        
+        lons, lats = modify_runoff_map(res_num, input_path_runoff, output_path_runoff,
                                        grid_name_oce, manual_basin_removal,verbose=verbose)
 
         modify_runoff_lsm(res_num, grid_name_oce, manual_basin_removal, lons, lats,
-                          output_path_oasis,verbose=verbose)'''
+                          output_path_oasis,verbose=verbose)
 
 
 
