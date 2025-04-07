@@ -854,6 +854,7 @@ def modify_runoff_map(res_num, input_path_runoff, output_path_runoff,
 
     drainage = rnffile.variables[u'drainage_basin_id'][:]
     arrival = rnffile.variables[u'arrival_point_id'][:]
+    calving = rnffile.variables[u'calving_point_id'][:]
 
     # Set projection
     lons = rnffile.variables[u'lon'][:]
@@ -916,41 +917,42 @@ def modify_runoff_map(res_num, input_path_runoff, output_path_runoff,
     # Fix for Glacial calving maps
     # Antarctica
     for lo, lon in enumerate(lons):
-        #removing old arrival points
+        #removing old calving points
         for la, lat in enumerate(lats):
             if lat < -55:
-                if arrival[la, lo] == 66:
-                    arrival[la, lo] = -2
+                if calving[la, lo] == 66:
+                    calving[la, lo] = -2
 
     for lo, lon in enumerate(lons):
-        # adding new arrival points
+        # adding new calving points
         if lon > 300 and lon < 320:
             for la, lat in enumerate(lats):
                 if lat > -70 and lat < -60:
-                    if arrival[la, lo] == -2:
-                        arrival[la, lo] = 66
+                    if calving[la, lo] == -2:
+                        calving[la, lo] = 66
         if lon > 320 and lon < 360:
             for la, lat in enumerate(lats):
                 if lat > -60 and lat < -50:
-                    if arrival[la, lo] == -2:
-                        arrival[la, lo] = 66
+                    if calving[la, lo] == -2:
+                        calving[la, lo] = 66
         if lon > 170 and lon < 180:
             for la, lat in enumerate(lats):
                 if lat > -75 and lat < -65:
-                    if arrival[la, lo] == -2:
-                        arrival[la, lo] = 66
+                    if calving[la, lo] == -2:
+                        calving[la, lo] = 66
     # Greenland
     for lo, lon in enumerate(lons):
-        # adding new arrival points
+        # adding new calving points
         if lon > 300 and lon < 310:
             for la, lat in enumerate(lats):
                 if lat > 50 and lat < 60:
-                    if arrival[la, lo] == -2:
-                        arrival[la, lo] = 1
+                    if calving[la, lo] == -2:
+                        calving[la, lo] = 1
 
     # Saving results
     rnffile.variables[u'drainage_basin_id'][:] = drainage
     rnffile.variables[u'arrival_point_id'][:] = arrival
+    rnffile.variables[u'calving_point_id'][:] = calving
     rnffile.close()
 
     plotting_runoff(drainage, arrival, lons, lats)
@@ -1128,7 +1130,7 @@ if __name__ == '__main__':
 
     # OpenIFS experiment name. This 4 digit code is part of the name of the
     # ICMGG????INIT file you got from EMCWF
-    exp_name_oifs = 'ab46' #default for cubic-octahedral
+    exp_name_oifs = 'ab45' #default for cubic-octahedral
     # I have not yet found a way to determine automatically the number of
     # fields in the ICMGG????INIT file. Set it correctly or stuff will break!
     num_fields = 81
@@ -1138,7 +1140,7 @@ if __name__ == '__main__':
     cavity = False # Does this mesh have ice cavities?
     # set regular grid for intermediate interpolation. 
     # should be heigher than source grid res.
-    interp_res = 'r3600x1801'
+    interp_res = 'r360x181'
     root_dir = '/work/ab0246/a270092/software/ocp-tool/'
     # Construct the relative path based on the script/notebook's location
     input_path_oce = root_dir+'input/fesom_mesh/'
