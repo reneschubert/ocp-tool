@@ -930,6 +930,11 @@ def modify_runoff_map(res_num, input_path_runoff, output_path_runoff,
                 if lat > -70 and lat < -60:
                     if calving[la, lo] == -2:
                         calving[la, lo] = 66
+        if lon > 315 and lon < 325:
+            for la, lat in enumerate(lats):
+                if lat > -65 and lat < -55:
+                    if calving[la, lo] == -2:
+                        calving[la, lo] = 66
         if lon > 320 and lon < 360:
             for la, lat in enumerate(lats):
                 if lat > -60 and lat < -50:
