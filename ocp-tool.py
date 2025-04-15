@@ -611,7 +611,7 @@ def process_lsm(res_num, truncation_type, input_path_oifs, output_path_oifs,
                                                      output_path_oifs, 
                                                      exp_name_oifs, num_fields,verbose=verbose)
     lsm_lat, lsm_lon, lsm_binary_a, lsm_binary_l, lsm_binary_r, gribfield_mod = modify_lsm(gribfield, 
-                                                           fesom_grid_sorted, 
+                                                           fesom_grid_sorted, grid_name_oce,
                                                            lsm_id, slt_id, cl_id, 
                                                            lons_list, center_lats, 
                                                            center_lons, crn_lats, crn_lons, 
@@ -1067,7 +1067,7 @@ def modify_runoff_lsm(res_num, grid_name_oce, manual_basin_removal, lons, lats,
 
     
     
-def modify_lsm(gribfield, fesom_grid_sorted, lsm_id, slt_id, cl_id, lons_list, 
+def modify_lsm(gribfield, fesom_grid_sorted, grid_name_oce, lsm_id, slt_id, cl_id, lons_list, 
                center_lats, center_lons, crn_lats, crn_lons, gridcell_area,
                verbose=False):
     '''
@@ -1081,21 +1081,24 @@ def modify_lsm(gribfield, fesom_grid_sorted, lsm_id, slt_id, cl_id, lons_list,
     lsm_binary_l = copy.deepcopy(gribfield[lsm_id])
     lsm_binary_l = lsm_binary_l[np.newaxis, :]
     lsm_binary_r = lsm_binary_l.copy()
-
-    # Automatic lake removal with lakes mask
     gribfield_mod = gribfield[:]
-    lsm_diff = np.subtract(gribfield_mod[lsm_id][:], fesom_grid_sorted)
-    
-    # Soil class of removed lakes is set to SANDY CLAY LOAM
-    for i in np.arange (0, len(gribfield_mod[slt_id])-1):
-        if gribfield_mod[lsm_id][i] <= 0.5 and fesom_grid_sorted[i] >= .5:
-            gribfield_mod[slt_id][i] = 6
-            gribfield_mod[lsm_id][i] = 1
 
-    for i in np.arange (0, len(gribfield_mod[slt_id])-1):
-        if gribfield_mod[lsm_id][i] >= 0.5 and fesom_grid_sorted[i] < .5:
-            gribfield_mod[slt_id][i] = 0
-            gribfield_mod[lsm_id][i] = 0
+    if grid_name_oce != 'AMIP':
+        # Automatic lake removal with lakes mask
+        lsm_diff = np.subtract(gribfield_mod[lsm_id][:], fesom_grid_sorted)
+        
+        # Soil class of removed lakes is set to SANDY CLAY LOAM
+        for i in np.arange (0, len(gribfield_mod[slt_id])-1):
+            if gribfield_mod[lsm_id][i] <= 0.5 and fesom_grid_sorted[i] >= .5:
+                gribfield_mod[slt_id][i] = 6
+                gribfield_mod[lsm_id][i] = 1
+
+        for i in np.arange (0, len(gribfield_mod[slt_id])-1):
+            if gribfield_mod[lsm_id][i] >= 0.5 and fesom_grid_sorted[i] < .5:
+                gribfield_mod[slt_id][i] = 0
+                gribfield_mod[lsm_id][i] = 0
+    else:
+        print(' Skipped modfiying OpenIFS grid, because we are in AMIP mode')
             
     # Mask with lakes counting as land in correct format for oasis3-mct file
     lsm_binary_a = gribfield_mod[lsm_id]
@@ -1110,7 +1113,7 @@ def modify_lsm(gribfield, fesom_grid_sorted, lsm_id, slt_id, cl_id, lons_list,
             lsm_lon.append(center_lons[0,i])
     print('Number of land points: '+str(len(lsm_lat)))
 
-    return (lsm_lat, lsm_lon, lsm_binary_a,lsm_binary_l, lsm_binary_r, gribfield_mod)
+    return (lsm_lat, lsm_lon, lsm_binary_a, lsm_binary_l, lsm_binary_r, gribfield_mod)
 
 
 
@@ -1141,7 +1144,7 @@ if __name__ == '__main__':
     num_fields = 81
 
     # Name of ocean model grid. 
-    grid_name_oce = 'CORE2'
+    grid_name_oce = 'AMIP'
     cavity = False # Does this mesh have ice cavities?
     # set regular grid for intermediate interpolation. 
     # should be heigher than source grid res.
@@ -1189,17 +1192,20 @@ if __name__ == '__main__':
         NN = generate_coord_area(res_num,
                                  input_path_reduced_grid, input_path_full_grid,
                                  truncation_type,exp_name_oifs=exp_name_oifs,verbose=verbose)
-        
-        fesom_grid_sorted = read_fesom_grid(input_path_oce ,grid_name_oce, fesom_grid_file_path ,interp_res, 
-                                          cavity=cavity, force_overwrite_griddes=force_overwrite_griddes, 
-                                          verbose=verbose)
-        
-        lsm_binary_a,lsm_binary_l,lsm_binary_r, gribfield_mod = process_lsm(res_num, truncation_type, input_path_oifs, output_path_oifs,
-                                 exp_name_oifs, output_path_lpjg, grid_name_oce, num_fields,
-                                 fesom_grid_sorted, lons_list,
-                                 center_lats, center_lons, crn_lats, crn_lons, 
-                                 gridcell_area, verbose=verbose)
 
+        if grid_name_oce != 'AMIP':
+            fesom_grid_sorted = read_fesom_grid(input_path_oce ,grid_name_oce, fesom_grid_file_path ,interp_res, 
+                                              cavity=cavity, force_overwrite_griddes=force_overwrite_griddes, 
+                                              verbose=verbose)
+        else:
+            print(' Skipped reading FESOM mesh, because we are in AMIP mode')
+            fesom_grid_sorted = []
+
+        lsm_binary_a,lsm_binary_l,lsm_binary_r, gribfield_mod = process_lsm(res_num, truncation_type, input_path_oifs, output_path_oifs,
+                                     exp_name_oifs, output_path_lpjg, grid_name_oce, num_fields,
+                                     fesom_grid_sorted, lons_list,
+                                     center_lats, center_lons, crn_lats, crn_lons, 
+                                     gridcell_area, verbose=verbose)
         write_oasis_files(res_num,
                           output_path_oasis, grid_name_oce, input_path_lpjg, output_path_lpjg,
                           center_lats, center_lons, crn_lats, crn_lons, gridcell_area,
