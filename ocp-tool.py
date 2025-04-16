@@ -1082,8 +1082,18 @@ def modify_lsm(gribfield, fesom_grid_sorted, grid_name_oce, lsm_id, slt_id, cl_i
     lsm_binary_l = lsm_binary_l[np.newaxis, :]
     lsm_binary_r = lsm_binary_l.copy()
     gribfield_mod = gribfield[:]
+    
+    # modifications for NEMO
+    cl_binary_l = copy.deepcopy(gribfield[cl_id])
+    cl_binary_l = cl_binary_l[np.newaxis, :]
+    
 
-    if grid_name_oce != 'AMIP':
+    if grid_name_oce == 'AMIP':
+        print(' Skipped modfiying OpenIFS grid, because we are in AMIP mode')
+    elif grid_name_oce == 'NEMO':
+        print('remove lakes for NEMO')
+        gribfield_mod[lsm_id] = lsm_binary_l[0,:] + cl_binary_l[0,:]
+    else:
         # Automatic lake removal with lakes mask
         lsm_diff = np.subtract(gribfield_mod[lsm_id][:], fesom_grid_sorted)
         
@@ -1097,8 +1107,6 @@ def modify_lsm(gribfield, fesom_grid_sorted, grid_name_oce, lsm_id, slt_id, cl_i
             if gribfield_mod[lsm_id][i] >= 0.5 and fesom_grid_sorted[i] < .5:
                 gribfield_mod[slt_id][i] = 0
                 gribfield_mod[lsm_id][i] = 0
-    else:
-        print(' Skipped modfiying OpenIFS grid, because we are in AMIP mode')
             
     # Mask with lakes counting as land in correct format for oasis3-mct file
     lsm_binary_a = gribfield_mod[lsm_id]
@@ -1127,29 +1135,29 @@ if __name__ == '__main__':
     Main program in which the tool configuration and function calls are located
     Please configure as needed.
     '''
-    verbose=False
+    verbose=True
     
     # Truncation number of desired OpenIFS grid. Multiple possible.
     # Choose the ones you need [63, 95, 159, 255, 319, 399, 511, 799, 1279]
-    resolution_list = [95]
+    resolution_list = [319]
 
     # Choose type of trucation. linear or cubic-octahedral
     truncation_type = 'cubic-octahedral'
 
     # OpenIFS experiment name. This 4 digit code is part of the name of the
     # ICMGG????INIT file you got from EMCWF
-    exp_name_oifs = 'ab45' #default for cubic-octahedral
+    exp_name_oifs = 'aboo' #default for cubic-octahedral
     # I have not yet found a way to determine automatically the number of
     # fields in the ICMGG????INIT file. Set it correctly or stuff will break!
-    num_fields = 81
+    num_fields = 81 # grib_ls ICM... (eccodes)
 
     # Name of ocean model grid. 
-    grid_name_oce = 'AMIP'
+    grid_name_oce = 'NEMO'
     cavity = False # Does this mesh have ice cavities?
     # set regular grid for intermediate interpolation. 
     # should be heigher than source grid res.
     interp_res = 'r360x181'
-    root_dir = '/work/ab0246/a270092/software/ocp-tool/'
+    root_dir = './'
     # Construct the relative path based on the script/notebook's location
     input_path_oce = root_dir+'input/fesom_mesh/'
     fesom_grid_file_path = '/work/ab0246/a270092/input/fesom2/CORE2/core2_griddes_nodes.nc'
@@ -1193,7 +1201,7 @@ if __name__ == '__main__':
                                  input_path_reduced_grid, input_path_full_grid,
                                  truncation_type,exp_name_oifs=exp_name_oifs,verbose=verbose)
 
-        if grid_name_oce != 'AMIP':
+        if (grid_name_oce != 'AMIP') & (grid_name_oce != 'NEMO'):
             fesom_grid_sorted = read_fesom_grid(input_path_oce ,grid_name_oce, fesom_grid_file_path ,interp_res, 
                                               cavity=cavity, force_overwrite_griddes=force_overwrite_griddes, 
                                               verbose=verbose)
